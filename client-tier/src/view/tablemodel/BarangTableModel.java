@@ -16,7 +16,7 @@ public class BarangTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public Barang getMahasiswaAt(int rowIndex) {
+    public Barang getBarangAt(int rowIndex) {
         return barangList.get(rowIndex);
     }
 

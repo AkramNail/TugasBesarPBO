@@ -26,9 +26,9 @@ import worker.barang.UpdateBarangWorker;
 
 public class BarangController {
     private final BarangFrame frame;
-    private final BarangApiClient mahasiswaApiClient = new BarangApiClient();
+    private final BarangApiClient barangApiClient = new BarangApiClient();
 
-    private List<Barang> allMahasiswa = new ArrayList<>();
+    private List<Barang> allBarang = new ArrayList<>();
     private List<Barang> displayedBarang = new ArrayList<>();
 
     private WebSocketClientHandler wsClient;
@@ -37,7 +37,7 @@ public class BarangController {
         this.frame = frame;
         setupEventListeners();
         setupWebSocket();
-        loadAllMahasiswa();
+        loadAllBarang();
     }
 
     private void setupWebSocket() {
@@ -61,12 +61,12 @@ public class BarangController {
         // Parse JSON jika dibutuhkan, untuk kasus ini setiap message yang diterima akan men-trigger loadAllMahasiswa
         
         // Run refresh di Swing thread (EDT)
-        SwingUtilities.invokeLater(() -> loadAllMahasiswa());
+        SwingUtilities.invokeLater(() -> loadAllBarang());
     }
 
     private void setupEventListeners() {
         frame.getAddButton().addActionListener(e -> openBarangDialog(null));
-        frame.getRefreshButton().addActionListener(e -> loadAllMahasiswa());
+        frame.getRefreshButton().addActionListener(e -> loadAllBarang());
         frame.getDeleteButton().addActionListener(e -> deleteSelectedBarang());
         frame.getBarangTable().addMouseListener(new MouseAdapter() {
             @Override
@@ -98,7 +98,7 @@ public class BarangController {
             private void applySearchFilter() {
                 String keyword = frame.getSearchField().getText().toLowerCase().trim();
                 displayedBarang = new ArrayList<>();
-                for (Barang mahasiswa : allMahasiswa) {
+                for (Barang mahasiswa : allBarang) {
                     if (mahasiswa.getKategori().toLowerCase().contains(keyword) ||
                             mahasiswa.getNama().toLowerCase().contains(keyword) ||
                             (mahasiswa.getJumlah() != null
@@ -123,14 +123,14 @@ public class BarangController {
             Barang mahasiswa = dialog.getBarang();
             SwingWorker<Void, Void> worker;
             if (barangToEdit == null) {
-                worker = new SaveBarangWorker(frame, mahasiswaApiClient, mahasiswa);
+                worker = new SaveBarangWorker(frame, barangApiClient, mahasiswa);
             } else {
-                worker = new UpdateBarangWorker(frame, mahasiswaApiClient, mahasiswa);
+                worker = new UpdateBarangWorker(frame, barangApiClient, mahasiswa);
             }
             worker.addPropertyChangeListener(evt -> {
                 if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                     dialog.dispose();
-                    loadAllMahasiswa();
+                    loadAllBarang();
                 }
             });
             worker.execute();
@@ -149,25 +149,25 @@ public class BarangController {
                 "Delete mahasiswa: " + barang.getKategori() + " - " + barang.getNama() + "?",
                 "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
-            DeleteBarangWorker worker = new DeleteBarangWorker(frame, mahasiswaApiClient, barang);
+            DeleteBarangWorker worker = new DeleteBarangWorker(frame, barangApiClient, barang);
             worker.addPropertyChangeListener(evt -> {
                 if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
-                    loadAllMahasiswa();
+                    loadAllBarang();
                 }
             });
             worker.execute();
         }
     }
 
-    private void loadAllMahasiswa() {
+    private void loadAllBarang() {
         frame.getProgressBar().setIndeterminate(true);
         frame.getProgressBar().setString("Loading data...");
-        LoadBarangWorker worker = new LoadBarangWorker(frame, mahasiswaApiClient);
+        LoadBarangWorker worker = new LoadBarangWorker(frame, barangApiClient);
         worker.addPropertyChangeListener(evt -> {
             if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                 try {
-                    allMahasiswa = worker.get();
-                    displayedBarang = new ArrayList<>(allMahasiswa);
+                    allBarang = worker.get();
+                    displayedBarang = new ArrayList<>(allBarang);
                     frame.getBarangTableModel().setBarangList(displayedBarang);
                     updateTotalRecordsLabel();
                 } catch (Exception ex) {

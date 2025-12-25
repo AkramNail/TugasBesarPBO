@@ -24,8 +24,8 @@ public class BarangFrame extends JFrame {
     private final JButton deleteButton = new JButton("Delete");
     private final JLabel totalRecordsLabel = new JLabel("0 Records");
 
-    private final JTable mahasiswaTable = new JTable();
-    private final BarangTableModel mahasiswaTableModel = new BarangTableModel();
+    private final JTable barangTable = new JTable();
+    private final BarangTableModel barangTableModel = new BarangTableModel();
     private final JProgressBar progressBar = new JProgressBar();
 
     public BarangFrame() {
@@ -37,13 +37,13 @@ public class BarangFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new MigLayout("fill, insets 20", "[grow]", "[]10[]10[grow]10[]10[]"));
 
-        mahasiswaTable.setModel(mahasiswaTableModel);
+        barangTable.setModel(barangTableModel);
         progressBar.setStringPainted(true);
 
         add(new JLabel("List Mahasiswa"), "wrap, span 2");
         add(createSearchPanel(), "growx, w 80%");
         add(createButtonPanel(), "wrap, right, w 20%");
-        add(new JScrollPane(mahasiswaTable), "grow, wrap, span 2");
+        add(new JScrollPane(barangTable), "grow, wrap, span 2");
         add(progressBar, "growx, h 20!, wrap, span 2");
         add(totalRecordsLabel, "right, span 2");
 
@@ -90,11 +90,11 @@ public class BarangFrame extends JFrame {
     }
 
     public JTable getBarangTable() {
-        return mahasiswaTable;
+        return barangTable;
     }
 
     public BarangTableModel getBarangTableModel() {
-        return mahasiswaTableModel;
+        return barangTableModel;
     }
 
     public JProgressBar getProgressBar() {

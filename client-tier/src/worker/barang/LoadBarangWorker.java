@@ -11,18 +11,18 @@ import view.BarangFrame;
 
 public class LoadBarangWorker extends SwingWorker<List<Barang>, Void> {
     private final BarangFrame frame;
-    private final BarangApiClient mahasiswaApiClient;
+    private final BarangApiClient barangApiClient;
 
-    public LoadBarangWorker(BarangFrame frame, BarangApiClient mahasiswaApiClient) {
+    public LoadBarangWorker(BarangFrame frame, BarangApiClient barangApiClient) {
         this.frame = frame;
-        this.mahasiswaApiClient = mahasiswaApiClient;
+        this.barangApiClient = barangApiClient;
         frame.getProgressBar().setIndeterminate(true);
         frame.getProgressBar().setString("Loading mahasiswa data...");
     }
 
     @Override
     protected List<Barang> doInBackground() throws Exception {
-        return mahasiswaApiClient.findAll();
+        return barangApiClient.findAll();
     }
 
     @Override

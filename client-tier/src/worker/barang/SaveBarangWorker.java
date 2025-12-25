@@ -9,20 +9,20 @@ import view.BarangFrame;
 
 public class SaveBarangWorker extends SwingWorker<Void, Void> {
     private final BarangFrame frame;
-    private final BarangApiClient mahasiswaApiClient;
-    private final Barang mahasiswa;
+    private final BarangApiClient barangApiClient;
+    private final Barang barang;
 
-    public SaveBarangWorker(BarangFrame frame, BarangApiClient mahasiswaApiClient, Barang mahasiswa) {
+    public SaveBarangWorker(BarangFrame frame, BarangApiClient barangApiClient, Barang barang) {
         this.frame = frame;
-        this.mahasiswaApiClient = mahasiswaApiClient;
-        this.mahasiswa = mahasiswa;
+        this.barangApiClient = barangApiClient;
+        this.barang = barang;
         frame.getProgressBar().setIndeterminate(true);
         frame.getProgressBar().setString("Saving new mahasiswa...");
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-        mahasiswaApiClient.create(mahasiswa);
+        barangApiClient.create(barang);
         return null;
     }
 
