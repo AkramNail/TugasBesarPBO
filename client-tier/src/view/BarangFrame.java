@@ -89,11 +89,11 @@ public class BarangFrame extends JFrame {
         return deleteButton;
     }
 
-    public JTable getMahasiswaTable() {
+    public JTable getBarangTable() {
         return mahasiswaTable;
     }
 
-    public BarangTableModel getMahasiswaTableModel() {
+    public BarangTableModel getBarangTableModel() {
         return mahasiswaTableModel;
     }
 

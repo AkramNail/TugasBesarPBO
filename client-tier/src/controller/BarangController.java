@@ -65,16 +65,16 @@ public class BarangController {
     }
 
     private void setupEventListeners() {
-        frame.getAddButton().addActionListener(e -> openMahasiswaDialog(null));
+        frame.getAddButton().addActionListener(e -> openBarangDialog(null));
         frame.getRefreshButton().addActionListener(e -> loadAllMahasiswa());
-        frame.getDeleteButton().addActionListener(e -> deleteSelectedMahasiswa());
-        frame.getMahasiswaTable().addMouseListener(new MouseAdapter() {
+        frame.getDeleteButton().addActionListener(e -> deleteSelectedBarang());
+        frame.getBarangTable().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int selectedRow = frame.getMahasiswaTable().getSelectedRow();
+                    int selectedRow = frame.getBarangTable().getSelectedRow();
                     if (selectedRow >= 0) {
-                        openMahasiswaDialog(displayedBarang.get(selectedRow));
+                        openBarangDialog(displayedBarang.get(selectedRow));
                     }
                 }
             }
@@ -106,23 +106,23 @@ public class BarangController {
                         displayedBarang.add(mahasiswa);
                     }
                 }
-                frame.getMahasiswaTableModel().setBarangList(displayedBarang);
+                frame.getBarangTableModel().setBarangList(displayedBarang);
                 updateTotalRecordsLabel();
             }
         });
     }
 
-    private void openMahasiswaDialog(Barang mahasiswaToEdit) {
+    private void openBarangDialog(Barang barangToEdit) {
         BarangDialog dialog;
-        if (mahasiswaToEdit == null) {
+        if (barangToEdit == null) {
             dialog = new BarangDialog(frame);
         } else {
-            dialog = new BarangDialog(frame, mahasiswaToEdit);
+            dialog = new BarangDialog(frame, barangToEdit);
         }
         dialog.getSaveButton().addActionListener(e -> {
             Barang mahasiswa = dialog.getBarang();
             SwingWorker<Void, Void> worker;
-            if (mahasiswaToEdit == null) {
+            if (barangToEdit == null) {
                 worker = new SaveBarangWorker(frame, mahasiswaApiClient, mahasiswa);
             } else {
                 worker = new UpdateBarangWorker(frame, mahasiswaApiClient, mahasiswa);
@@ -138,8 +138,8 @@ public class BarangController {
         dialog.setVisible(true);
     }
 
-    private void deleteSelectedMahasiswa() {
-        int selectedRow = frame.getMahasiswaTable().getSelectedRow();
+    private void deleteSelectedBarang() {
+        int selectedRow = frame.getBarangTable().getSelectedRow();
         if (selectedRow < 0) {
             JOptionPane.showMessageDialog(frame, "Please select a record to delete.");
             return;
@@ -168,7 +168,7 @@ public class BarangController {
                 try {
                     allMahasiswa = worker.get();
                     displayedBarang = new ArrayList<>(allMahasiswa);
-                    frame.getMahasiswaTableModel().setBarangList(displayedBarang);
+                    frame.getBarangTableModel().setBarangList(displayedBarang);
                     updateTotalRecordsLabel();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(frame, "Failed to load data.");
