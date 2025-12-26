@@ -25,6 +25,7 @@ import worker.barang.SaveBarangWorker;
 import worker.barang.UpdateBarangWorker;
 
 public class BarangController {
+
     private final BarangFrame frame;
     private final BarangApiClient barangApiClient = new BarangApiClient();
 
@@ -46,66 +47,83 @@ public class BarangController {
             wsClient = new WebSocketClientHandler(uri, new Consumer<String>() {
                 @Override
                 public void accept(String message) {
-                    System.out.println("Received real-time update: " + message);
                     handleWebSocketMessage(message);
                 }
             });
             wsClient.connect();
         } catch (URISyntaxException e) {
-            JOptionPane.showMessageDialog(frame, "Failed to connect to real-time server: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Gagal koneksi real time\n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
     private void handleWebSocketMessage(String message) {
-        // Parse JSON jika dibutuhkan, untuk kasus ini setiap message yang diterima akan men-trigger loadAllMahasiswa
-        
-        // Run refresh di Swing thread (EDT)
         SwingUtilities.invokeLater(() -> loadAllBarang());
     }
 
     private void setupEventListeners() {
+
         frame.getAddButton().addActionListener(e -> openBarangDialog(null));
         frame.getRefreshButton().addActionListener(e -> loadAllBarang());
         frame.getDeleteButton().addActionListener(e -> deleteSelectedBarang());
+        frame.getUpdateButton().addActionListener(e -> {
+        int row = frame.getBarangTable().getSelectedRow();
+
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Pilih data barang dulu");
+                return;
+            }
+
+            Barang barang = displayedBarang.get(row);
+            openBarangDialog(barang);
+        });
+
+
         frame.getBarangTable().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int selectedRow = frame.getBarangTable().getSelectedRow();
-                    if (selectedRow >= 0) {
-                        openBarangDialog(displayedBarang.get(selectedRow));
+                    int row = frame.getBarangTable().getSelectedRow();
+                    if (row >= 0) {
+                        openBarangDialog(displayedBarang.get(row));
                     }
                 }
             }
         });
+
         frame.getSearchField().getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                applySearchFilter();
+                applyFilter();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                applySearchFilter();
+                applyFilter();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                applySearchFilter();
+                applyFilter();
             }
 
-            private void applySearchFilter() {
+            private void applyFilter() {
                 String keyword = frame.getSearchField().getText().toLowerCase().trim();
                 displayedBarang = new ArrayList<>();
-                for (Barang mahasiswa : allBarang) {
-                    if (mahasiswa.getKategori().toLowerCase().contains(keyword) ||
-                            mahasiswa.getNama().toLowerCase().contains(keyword) ||
-                            (mahasiswa.getJumlah() != null
-                                    && mahasiswa.getJumlah().toLowerCase().contains(keyword))) {
-                        displayedBarang.add(mahasiswa);
+
+                for (Barang barang : allBarang) {
+                    if (barang.getKategori().toLowerCase().contains(keyword)
+                            || barang.getNama().toLowerCase().contains(keyword)
+                            || barang.getJumlah() != null
+                            && barang.getJumlah().toLowerCase().contains(keyword)) {
+                        displayedBarang.add(barang);
                     }
                 }
+
                 frame.getBarangTableModel().setBarangList(displayedBarang);
                 updateTotalRecordsLabel();
             }
@@ -113,56 +131,77 @@ public class BarangController {
     }
 
     private void openBarangDialog(Barang barangToEdit) {
-        BarangDialog dialog;
-        if (barangToEdit == null) {
-            dialog = new BarangDialog(frame);
-        } else {
-            dialog = new BarangDialog(frame, barangToEdit);
-        }
+
+        BarangDialog dialog = barangToEdit == null
+                ? new BarangDialog(frame)
+                : new BarangDialog(frame, barangToEdit);
+
         dialog.getSaveButton().addActionListener(e -> {
-            Barang mahasiswa = dialog.getBarang();
+
+            Barang barang = dialog.getBarang();
             SwingWorker<Void, Void> worker;
+
             if (barangToEdit == null) {
-                worker = new SaveBarangWorker(frame, barangApiClient, mahasiswa);
+                worker = new SaveBarangWorker(frame, barangApiClient, barang);
             } else {
-                worker = new UpdateBarangWorker(frame, barangApiClient, mahasiswa);
+                worker = new UpdateBarangWorker(frame, barangApiClient, barang);
             }
+
             worker.addPropertyChangeListener(evt -> {
                 if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                     dialog.dispose();
                     loadAllBarang();
                 }
             });
+
             worker.execute();
         });
+
         dialog.setVisible(true);
     }
 
     private void deleteSelectedBarang() {
-        int selectedRow = frame.getBarangTable().getSelectedRow();
-        if (selectedRow < 0) {
-            JOptionPane.showMessageDialog(frame, "Please select a record to delete.");
+
+        int row = frame.getBarangTable().getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Pilih data barang yang akan dihapus"
+            );
             return;
         }
-        Barang barang = displayedBarang.get(selectedRow);
-        int confirm = JOptionPane.showConfirmDialog(frame,
-                "Delete mahasiswa: " + barang.getKategori() + " - " + barang.getNama() + "?",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        Barang barang = displayedBarang.get(row);
+
+        int confirm = JOptionPane.showConfirmDialog(
+                frame,
+                "Hapus barang:\n" + barang.getKategori() + " - " + barang.getNama(),
+                "Hapus Data Barang",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
         if (confirm == JOptionPane.YES_OPTION) {
-            DeleteBarangWorker worker = new DeleteBarangWorker(frame, barangApiClient, barang);
+            DeleteBarangWorker worker =
+                    new DeleteBarangWorker(frame, barangApiClient, barang);
+
             worker.addPropertyChangeListener(evt -> {
                 if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                     loadAllBarang();
                 }
             });
+
             worker.execute();
         }
     }
 
     private void loadAllBarang() {
+
         frame.getProgressBar().setIndeterminate(true);
-        frame.getProgressBar().setString("Loading data...");
+        frame.getProgressBar().setString("Loading data");
+
         LoadBarangWorker worker = new LoadBarangWorker(frame, barangApiClient);
+
         worker.addPropertyChangeListener(evt -> {
             if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                 try {
@@ -170,14 +209,15 @@ public class BarangController {
                     displayedBarang = new ArrayList<>(allBarang);
                     frame.getBarangTableModel().setBarangList(displayedBarang);
                     updateTotalRecordsLabel();
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, "Failed to load data.");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(frame, "Gagal memuat data");
                 } finally {
                     frame.getProgressBar().setIndeterminate(false);
                     frame.getProgressBar().setString("Ready");
                 }
             }
         });
+
         worker.execute();
     }
 

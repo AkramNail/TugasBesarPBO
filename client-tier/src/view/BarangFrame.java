@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 
@@ -11,66 +12,134 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.ListSelectionModel;
 
 import net.miginfocom.swing.MigLayout;
 import view.tablemodel.BarangTableModel;
 
 public class BarangFrame extends JFrame {
 
-    private final JTextField searchField = new JTextField(30);
-    private final JButton addButton = new JButton("Add New");
-    private final JButton refreshButton = new JButton("Refresh");
-    private final JButton deleteButton = new JButton("Delete");
-    private final JLabel totalRecordsLabel = new JLabel("0 Records");
-
-    private final JTable barangTable = new JTable();
-    private final BarangTableModel barangTableModel = new BarangTableModel();
-    private final JProgressBar progressBar = new JProgressBar();
+    private JTextField searchField;
+    private JButton addButton;
+    private JButton updateButton;
+    private JButton refreshButton;
+    private JButton deleteButton;
+    private JLabel totalRecordsLabel;
+    private JTable barangTable;
+    private BarangTableModel barangTableModel;
+    private JProgressBar progressBar;
 
     public BarangFrame() {
-        initializeUI();        
+        initUI();
     }
 
-    private void initializeUI(){
-        setTitle("EduCore - Management Mahasiswa");
+    private void initUI() {
+        setTitle("Pendataan Barang Gudang");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new MigLayout("fill, insets 20", "[grow]", "[]10[]10[grow]10[]10[]"));
+        setMinimumSize(new Dimension(1000, 620));
+        setLocationRelativeTo(null);
 
-        barangTable.setModel(barangTableModel);
+        setLayout(new MigLayout("fill", "[grow]", "[]20[]20[grow]15[]"));
+        getContentPane().setBackground(new Color(236, 239, 241));
+
+        // HEADER
+        JPanel header = new JPanel(new MigLayout("fill"));
+        header.setBackground(new Color(38, 50, 56));
+
+        JLabel title = new JLabel("Pendataan Barang Gudang");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+
+        header.add(title, "left");
+        add(header, "growx, wrap");
+
+        // CONTROL
+        JPanel control = new JPanel(new MigLayout("fill, insets 15", "[grow][right]"));
+        control.setBackground(Color.WHITE);
+
+        JLabel searchLabel = new JLabel("Cari barang");
+        searchLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        searchField = new JTextField(25);
+        searchField.setPreferredSize(new Dimension(0, 34));
+        searchField.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        JPanel left = new JPanel(new MigLayout("fill", "[]10[grow]"));
+        left.setBackground(Color.WHITE);
+        left.add(searchLabel);
+        left.add(searchField, "growx");
+
+        addButton = new JButton("Tambah");
+        updateButton = new JButton("Ubah");
+        refreshButton = new JButton("Muat Ulang");
+        deleteButton = new JButton("Hapus");
+
+        addButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        addButton.setBackground(new Color(76, 175, 80));
+        addButton.setForeground(Color.WHITE);
+        addButton.setFocusPainted(false);
+
+        updateButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        updateButton.setBackground(new Color(255, 193, 7));
+        updateButton.setFocusPainted(false);
+        updateButton.setEnabled(false);
+
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        refreshButton.setBackground(new Color(189, 189, 189));
+        refreshButton.setFocusPainted(false);
+
+        deleteButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        deleteButton.setBackground(new Color(229, 57, 53));
+        deleteButton.setForeground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        deleteButton.setEnabled(false);
+
+        JPanel right = new JPanel(new MigLayout("right"));
+        right.setBackground(Color.WHITE);
+        right.add(addButton);
+        right.add(updateButton);
+        right.add(refreshButton);
+        right.add(deleteButton);
+
+        control.add(left, "growx");
+        control.add(right, "right");
+        add(control, "growx, wrap");
+
+        // TABLE
+        barangTableModel = new BarangTableModel();
+        barangTable = new JTable(barangTableModel);
+        barangTable.setRowHeight(30);
+        barangTable.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        barangTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        barangTable.setGridColor(new Color(224, 224, 224));
+        barangTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        barangTable.getSelectionModel().addListSelectionListener(e -> {
+            boolean selected = barangTable.getSelectedRow() >= 0;
+            updateButton.setEnabled(selected);
+            deleteButton.setEnabled(selected);
+        });
+
+        JPanel tablePanel = new JPanel(new MigLayout("fill"));
+        tablePanel.setBackground(Color.WHITE);
+        tablePanel.add(new JScrollPane(barangTable), "grow");
+
+        add(tablePanel, "grow, wrap");
+
+        // FOOTER
+        JPanel footer = new JPanel(new MigLayout("fill", "[][grow]"));
+        footer.setBackground(new Color(236, 239, 241));
+
+        totalRecordsLabel = new JLabel("Total 0 data");
+
+        progressBar = new JProgressBar();
+        progressBar.setPreferredSize(new Dimension(180, 14));
         progressBar.setStringPainted(true);
 
-        add(new JLabel("List Mahasiswa"), "wrap, span 2");
-        add(createSearchPanel(), "growx, w 80%");
-        add(createButtonPanel(), "wrap, right, w 20%");
-        add(new JScrollPane(barangTable), "grow, wrap, span 2");
-        add(progressBar, "growx, h 20!, wrap, span 2");
-        add(totalRecordsLabel, "right, span 2");
+        footer.add(totalRecordsLabel, "left");
+        footer.add(progressBar, "right");
 
-        pack();
-        setMinimumSize(new Dimension(1000, 600));
-        setLocationRelativeTo(null);
-    }
-
-    private JPanel createSearchPanel() {
-        JPanel panel = new JPanel(new MigLayout(""));
-        panel.add(new JLabel("Search:"));
-        panel.add(searchField, "growx");
-        return panel;
-    }
-
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new MigLayout("right"));
-        
-        addButton.setBackground(UIManager.getColor("Button.default.background"));
-        addButton.setForeground(UIManager.getColor("Button.default.foreground"));
-        addButton.setFont(addButton.getFont().deriveFont(Font.BOLD));
-        
-        panel.add(deleteButton);
-        panel.add(refreshButton);
-        panel.add(addButton);
-        
-        return panel;
+        add(footer, "growx");
     }
 
     public JTextField getSearchField() {
@@ -79,6 +148,10 @@ public class BarangFrame extends JFrame {
 
     public JButton getAddButton() {
         return addButton;
+    }
+
+    public JButton getUpdateButton() {
+        return updateButton;
     }
 
     public JButton getRefreshButton() {
@@ -104,5 +177,4 @@ public class BarangFrame extends JFrame {
     public JLabel getTotalRecordsLabel() {
         return totalRecordsLabel;
     }
-
 }

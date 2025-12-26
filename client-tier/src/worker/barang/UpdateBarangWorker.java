@@ -8,38 +8,47 @@ import model.Barang;
 import view.BarangFrame;
 
 public class UpdateBarangWorker extends SwingWorker<Void, Void> {
-    private final BarangFrame frame;
-    private final BarangApiClient barangApiClient;
-    private final Barang barang;
 
-    public UpdateBarangWorker(BarangFrame frame, BarangApiClient barangApiClient, Barang barang) {
-        this.frame = frame;
-        this.barangApiClient = barangApiClient;
-        this.barang = barang;
-        frame.getProgressBar().setIndeterminate(true);
-        frame.getProgressBar().setString("Updating mahasiswa data...");
-    }
+private final BarangFrame frame;
+private final BarangApiClient barangApiClient;
+private final Barang barang;
 
-    @Override
-    protected Void doInBackground() throws Exception {
-        barangApiClient.update(barang);
-        return null;
-    }
+public UpdateBarangWorker(BarangFrame frame, BarangApiClient barangApiClient, Barang barang) {
+    this.frame = frame;
+    this.barangApiClient = barangApiClient;
+    this.barang = barang;
 
-    @Override
-    protected void done() {
-        frame.getProgressBar().setIndeterminate(false);
-        try {
-            get();
-            frame.getProgressBar().setString("Mahasiswa updated successfully");
-            JOptionPane.showMessageDialog(frame,
-                    "Mahasiswa record has been updated.",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            frame.getProgressBar().setString("Failed to update mahasiswa");
-            JOptionPane.showMessageDialog(frame,
-                    "Error updating data: \n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-        }
+    frame.getProgressBar().setIndeterminate(true);
+    frame.getProgressBar().setString("Mengubah data barang");
+}
+
+@Override
+protected Void doInBackground() throws Exception {
+    barangApiClient.update(barang);
+    return null;
+}
+
+@Override
+protected void done() {
+    frame.getProgressBar().setIndeterminate(false);
+
+    try {
+        get();
+        frame.getProgressBar().setString("Data barang berhasil diubah");
+        JOptionPane.showMessageDialog(
+                frame,
+                "Data barang berhasil diubah",
+                "Berhasil",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    } catch (Exception e) {
+        frame.getProgressBar().setString("Gagal mengubah data barang");
+        JOptionPane.showMessageDialog(
+                frame,
+                "Gagal mengubah data\n" + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
+}
 }

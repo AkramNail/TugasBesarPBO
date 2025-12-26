@@ -8,6 +8,7 @@ import model.Barang;
 import view.BarangFrame;
 
 public class SaveBarangWorker extends SwingWorker<Void, Void> {
+
     private final BarangFrame frame;
     private final BarangApiClient barangApiClient;
     private final Barang barang;
@@ -16,8 +17,9 @@ public class SaveBarangWorker extends SwingWorker<Void, Void> {
         this.frame = frame;
         this.barangApiClient = barangApiClient;
         this.barang = barang;
+
         frame.getProgressBar().setIndeterminate(true);
-        frame.getProgressBar().setString("Saving new mahasiswa...");
+        frame.getProgressBar().setString("Menyimpan data barang");
     }
 
     @Override
@@ -29,17 +31,24 @@ public class SaveBarangWorker extends SwingWorker<Void, Void> {
     @Override
     protected void done() {
         frame.getProgressBar().setIndeterminate(false);
+
         try {
-            get(); // To catch any exception
-            frame.getProgressBar().setString("Mahasiswa saved successfully");
-            JOptionPane.showMessageDialog(frame,
-                    "New mahasiswa record has been saved.",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            get();
+            frame.getProgressBar().setString("Data barang berhasil disimpan");
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Data barang berhasil disimpan",
+                    "Berhasil",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
         } catch (Exception e) {
-            frame.getProgressBar().setString("Failed to save mahasiswa");
-            JOptionPane.showMessageDialog(frame,
-                    "Error saving data: \n" + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            frame.getProgressBar().setString("Gagal menyimpan data barang");
+            JOptionPane.showMessageDialog(
+                    frame,
+                    "Gagal menyimpan data\n" + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 }
