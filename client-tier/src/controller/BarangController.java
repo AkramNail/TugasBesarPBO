@@ -7,6 +7,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -41,6 +43,13 @@ public class BarangController {
         loadAllBarang();
     }
 
+    // ===================== WAKTU REALTIME =====================
+    private String getWaktuSekarang() {
+        return LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+    // ==========================================================
+
     private void setupWebSocket() {
         try {
             URI uri = new URI("ws://localhost:3000");
@@ -71,7 +80,7 @@ public class BarangController {
         frame.getRefreshButton().addActionListener(e -> loadAllBarang());
         frame.getDeleteButton().addActionListener(e -> deleteSelectedBarang());
         frame.getUpdateButton().addActionListener(e -> {
-        int row = frame.getBarangTable().getSelectedRow();
+            int row = frame.getBarangTable().getSelectedRow();
 
             if (row < 0) {
                 JOptionPane.showMessageDialog(frame, "Pilih data barang dulu");
@@ -81,7 +90,6 @@ public class BarangController {
             Barang barang = displayedBarang.get(row);
             openBarangDialog(barang);
         });
-
 
         frame.getBarangTable().addMouseListener(new MouseAdapter() {
             @Override
@@ -139,6 +147,10 @@ public class BarangController {
         dialog.getSaveButton().addActionListener(e -> {
 
             Barang barang = dialog.getBarang();
+
+            // ⬅️ SET WAKTU SAAT SIMPAN / UPDATE
+            barang.setWaktu(getWaktuSekarang());
+
             SwingWorker<Void, Void> worker;
 
             if (barangToEdit == null) {
@@ -206,9 +218,18 @@ public class BarangController {
             if (SwingWorker.StateValue.DONE.equals(evt.getNewValue())) {
                 try {
                     allBarang = worker.get();
+
+                    // ⬅️ ISI WAKTU UNTUK DATA YANG DILOAD
+                    for (Barang barang : allBarang) {
+                        if (barang.getWaktu() == null) {
+                            barang.setWaktu(getWaktuSekarang());
+                        }
+                    }
+
                     displayedBarang = new ArrayList<>(allBarang);
                     frame.getBarangTableModel().setBarangList(displayedBarang);
                     updateTotalRecordsLabel();
+
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(frame, "Gagal memuat data");
                 } finally {

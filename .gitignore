@@ -1,0 +1,24 @@
+# Java class files
+*.class
+
+# Build folders
+bin/
+build/
+
+# IDE / Editor folders
+.vscode/
+*.iml
+.idea/
+
+# Database / log files
+*.log
+*.db
+*.sqlite
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other temporary files
+*.tmp
+*.swp

@@ -3,6 +3,8 @@ package view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -20,6 +22,7 @@ public class BarangDialog extends JDialog {
     private final JTextField namaField = new JTextField(20);
     private final JTextField kategoriField = new JTextField(20);
     private final JTextField jumlahField = new JTextField(20);
+    private final JTextField waktuField = new JTextField(20); // ⬅️ FIELD BARU
 
     private final JButton saveButton = new JButton("Simpan");
     private final JButton cancelButton = new JButton("Batal");
@@ -30,6 +33,9 @@ public class BarangDialog extends JDialog {
         super(owner, "Tambah Barang", true);
         barang = new Barang();
         initUI();
+
+        // ⬅️ ISI WAKTU SAAT TAMBAH
+        waktuField.setText(getWaktuSekarang());
     }
 
     public BarangDialog(JFrame owner, Barang barangToEdit) {
@@ -43,6 +49,7 @@ public class BarangDialog extends JDialog {
         namaField.setText(barangToEdit.getNama());
         kategoriField.setText(barangToEdit.getKategori());
         jumlahField.setText(barangToEdit.getJumlah());
+        waktuField.setText(barangToEdit.getWaktu()); // ⬅️ TAMPILKAN WAKTU LAMA
     }
 
     private void initUI() {
@@ -53,7 +60,7 @@ public class BarangDialog extends JDialog {
         add(createFormCard(), "growx, wrap");
         add(createButtonBar(), "right");
 
-        setMinimumSize(new Dimension(520, 460));
+        setMinimumSize(new Dimension(520, 520)); // ⬅️ DITINGGIKAN
         setLocationRelativeTo(getOwner());
     }
 
@@ -77,6 +84,10 @@ public class BarangDialog extends JDialog {
         styleField(namaField);
         styleField(kategoriField);
         styleField(jumlahField);
+        styleField(waktuField);
+
+        waktuField.setEditable(false); // ⬅️ READ ONLY
+        waktuField.setBackground(new Color(243, 244, 246));
 
         panel.add(new JLabel("ID Barang"));
         panel.add(idField, "growx, wrap");
@@ -88,7 +99,10 @@ public class BarangDialog extends JDialog {
         panel.add(kategoriField, "growx, wrap");
 
         panel.add(new JLabel("Jumlah"));
-        panel.add(jumlahField, "growx");
+        panel.add(jumlahField, "growx, wrap");
+
+        panel.add(new JLabel("Waktu"));
+        panel.add(waktuField, "growx"); // ⬅️ BARU
 
         return panel;
     }
@@ -134,6 +148,13 @@ public class BarangDialog extends JDialog {
         barang.setNama(namaField.getText().trim());
         barang.setKategori(kategoriField.getText().trim());
         barang.setJumlah(jumlahField.getText().trim());
+        barang.setWaktu(waktuField.getText().trim()); // ⬅️ SIMPAN WAKTU
         return barang;
+    }
+
+    // ===================== WAKTU REALTIME =====================
+    private String getWaktuSekarang() {
+        return LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

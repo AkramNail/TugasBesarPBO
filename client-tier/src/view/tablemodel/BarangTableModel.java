@@ -8,8 +8,17 @@ import javax.swing.table.AbstractTableModel;
 import model.Barang;
 
 public class BarangTableModel extends AbstractTableModel {
+
     private List<Barang> barangList = new ArrayList<>();
-    private final String[] columnNames = { "id", "nama", "kategori", "jumlah" };
+
+    // 
+    private final String[] columnNames = {
+        "id",
+        "nama",
+        "kategori",
+        "jumlah",
+        "waktu"
+    };
 
     public void setBarangList(List<Barang> barangList) {
         this.barangList = barangList;
@@ -38,11 +47,13 @@ public class BarangTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Barang barang = barangList.get(rowIndex);
+
         return switch (columnIndex) {
             case 0 -> barang.getId();
             case 1 -> barang.getNama();
             case 2 -> barang.getKategori();
             case 3 -> barang.getJumlah();
+            case 4 -> barang.getWaktu(); // ⬅
             default -> null;
         };
     }
